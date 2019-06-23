@@ -5,6 +5,7 @@ import javafx.util.Pair;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ApplicationController {
 	public ApplicationController(ShakingBuildingController shaking) {
@@ -45,6 +46,22 @@ public class ApplicationController {
 		}
 	}
 
+	private static Optional<Double[]> extractValues(String text) {
+		String[] tokens;
+		tokens = text.split(";");
+
+		if (tokens.length != 3) {
+			return Optional.empty();
+		}
+		else {
+			Double[] values = new Double[3];
+			values[0] = Double.valueOf(tokens[0].replaceAll(",", "."));
+			values[1] = Double.valueOf(tokens[1].replaceAll(",", "."));
+			values[2] = Double.valueOf(tokens[2].replaceAll(",", "."));
+			return Optional.of(values);
+		}
+	}
+
 	private static List<Pair<Double, Double>> readCsvDataFile(File dataFile) throws IOException {
 		List<Pair<Double, Double>> result = new ArrayList<>();
 		BufferedReader reader = new BufferedReader(new FileReader(dataFile));
@@ -52,24 +69,15 @@ public class ApplicationController {
 		do {
 			currentLine = reader.readLine();
 			if (currentLine != null) {
-				String[] valuesArray = currentLine.split(",");
-				String[] alternativeVluesArray = currentLine.split(";"); // for compatibility with Excel CSV format
-				String[] effectiveValues;
-
-				if (valuesArray.length == 2) {
-					effectiveValues = valuesArray;
-				}
-				else if (alternativeVluesArray.length == 2) {
-					effectiveValues = alternativeVluesArray;
-				}
-				else {
-					throw new IllegalArgumentException(currentLine);
-				}
-
-				Double time = Double.valueOf(effectiveValues[0]);
-				Double offset = Double.valueOf(effectiveValues[1]);
-				System.out.println(time.toString() + " -> " + offset.toString());
-				result.add(new Pair<>(time, offset * 1000));
+				String msg = currentLine;
+				Double[] values =
+						extractValues(currentLine)
+						.orElseThrow(() -> new IllegalArgumentException(msg));
+				Double time = values[0];
+				Double groundOffset = values[1];
+				Double buildingOffset = values[2];
+				System.out.println("[" + time.toString() + "s] -> (" + groundOffset.toString() + "m;" + buildingOffset.toString() + "m");
+				result.add(new Pair<>(time, buildingOffset * 1000));
 			}
 		} while (currentLine != null);
 

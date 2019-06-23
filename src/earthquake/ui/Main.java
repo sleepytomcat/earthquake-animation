@@ -75,6 +75,7 @@ public class Main extends Application {
 	    playButton.setOnAction(event -> applicationController.startShaking());
 	    pauseButton.setOnAction(event -> applicationController.pauseShaking());
 	    stopButton.setOnAction(event -> applicationController.stopShaking());
+
 	    /*
 	    tenthSpeedButton.setOnAction(event -> applicationController.shakingSpeed(0.1));
 	    halfSpeedButton.setOnAction(event -> applicationController.shakingSpeed(0.5));
