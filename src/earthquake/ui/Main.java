@@ -16,27 +16,27 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.File;
+import java.util.Locale;
 
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+    	System.out.println("ver 1");
+	    Locale.setDefault(new Locale("ru", "RU"));
+	    System.out.println(Locale.getDefault());
     	final double sceneWidth = 1400;
         final double sceneHeight = 700;
 
-        Pair<Pane, Pane> animated = generateAnimatedPane();
+        Pane[] animated = generateAnimatedPane();
+        Pane animationPane = animated[0];
+        Pane groundPane = animated[1];
+        Pane buildingPane = animated[2];
 
 	    Button playButton = new Button("Запуск");
 	    Button pauseButton = new Button("Пауза");
 	    Button stopButton = new Button("Стоп");
-	    /*
-	    Button normalSpeedButton = new Button("Скорость 1x");
-	    Button tenthSpeedButton = new Button("Скорость 0.1x");
-	    Button halfSpeedButton = new Button("Скорость 0.5x");
-	    Button doubleSpeedButton = new Button("Скорость 2x");
-	    Button tenSpeedButton = new Button("Скорость 10x");
-	    */
 	    Button openFileButton = new Button("Загрузить данные");
 
 	    HBox hbox = new HBox();
@@ -45,44 +45,26 @@ public class Main extends Application {
 	    hbox.setBackground(new Background(new BackgroundFill(Color.FIREBRICK, null, null)));
 
 	    hbox.getChildren().addAll(playButton, pauseButton, stopButton);
-	    //hbox.getChildren().addAll(tenthSpeedButton, halfSpeedButton, normalSpeedButton, doubleSpeedButton, tenSpeedButton);
 	    hbox.getChildren().addAll(openFileButton);
-	    animated.getKey().setBackground(new Background(new BackgroundFill(Color.PINK, null, null)));
+	    animated[0].setBackground(new Background(new BackgroundFill(Color.PINK, null, null)));
 
 	    BorderPane borderPaneLayout = new BorderPane();
-	    borderPaneLayout.setCenter(animated.getKey());
+	    borderPaneLayout.setCenter(animationPane);
 	    borderPaneLayout.setBottom(hbox);
 	    borderPaneLayout.setBackground(new Background(new BackgroundFill(Color.YELLOWGREEN, null, null)));
 
-	    //Creating a Scene by passing the group object, height and width
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-
-        //setting color to the scene
         scene.setFill(Color.TURQUOISE);
-
-        //Setting the title to Stage.
         primaryStage.setTitle("Землятресения");
-
-        //Adding the scene to Stage
         primaryStage.setScene(scene);
-
-        //Displaying the contents of the stage
         primaryStage.show();
 
-	    ShakingBuildingController shakingController = new ShakingBuildingController(animated.getValue());
+	    ShakingBuildingController shakingController = new ShakingBuildingController(groundPane, buildingPane);
 
 	    applicationController = new ApplicationController(shakingController);
 	    playButton.setOnAction(event -> applicationController.startShaking());
 	    pauseButton.setOnAction(event -> applicationController.pauseShaking());
 	    stopButton.setOnAction(event -> applicationController.stopShaking());
-
-	    /*
-	    tenthSpeedButton.setOnAction(event -> applicationController.shakingSpeed(0.1));
-	    halfSpeedButton.setOnAction(event -> applicationController.shakingSpeed(0.5));
-	    normalSpeedButton.setOnAction(event -> applicationController.shakingSpeed(1));
-	    doubleSpeedButton.setOnAction(event -> applicationController.shakingSpeed(2));
-	    tenSpeedButton.setOnAction(event -> applicationController.shakingSpeed(10));
-	    */
 
 	    openFileButton.setOnAction(event -> {
 		    FileChooser fileChooser = new FileChooser();
@@ -94,7 +76,7 @@ public class Main extends Application {
 	    });
     }
 
-    static Pair<Pane, Rectangle> generateBox() {
+    static Pane generateBox() {
         final double w = 300;
         final double h = 500;
         Rectangle rect = new Rectangle(-w/2, -h, w, h);
@@ -108,12 +90,12 @@ public class Main extends Application {
 			    5.0, -20.0,
 			    -5.0, -20.0 });
 
-	    Pane result = new Pane();
-        result.getChildren().addAll(rect, centerMarkk);
-        return new Pair<>(result, rect);
+	    Pane buildingPane = new Pane();
+        buildingPane.getChildren().addAll(rect, centerMarkk);
+        return buildingPane;
     }
 
-    static Group generateFloor() {
+    static Pane generateFloor() {
         final double w = 700;
         final double h = 5;
         Rectangle rect = new Rectangle(-w/2, 0, w, h);
@@ -121,15 +103,16 @@ public class Main extends Application {
 	    rect.setStroke(Color.DARKGRAY);
 	    rect.setStrokeWidth(2);
 
-	    return new Group(rect);
+	    return new Pane(rect);
     }
 
-    static Pair<Pane, Pane> generateAnimatedPane() {
+    static Pane[] generateAnimatedPane() {
         Pane centeredPane = new Pane();
 	    centeredPane.setBackground(new Background(new BackgroundFill(Color.YELLOW, null, null)));
 	    Group g = new Group();
-	    Pair<Pane, Rectangle> z = generateBox();
-	    g.getChildren().addAll(z.getKey(), generateFloor());
+	    Pane buildingPane = generateBox();
+	    Pane groundPane = generateFloor();
+	    g.getChildren().addAll(buildingPane, groundPane);
 	    centeredPane.getChildren().add(g);
 	    g.setAutoSizeChildren(false);
 
@@ -156,7 +139,12 @@ public class Main extends Application {
 	    HBox hbox = new HBox();
 	    hbox.getChildren().add(centeredPane);
 	    hbox.setAlignment(Pos.CENTER);
-	    return new Pair<>(centeredPane, z.getKey());
+
+	    Pane[] panes = new Pane[3];
+	    panes[0] = centeredPane;
+	    panes[1] = groundPane;
+	    panes[2] = buildingPane;
+	    return panes;
     }
 
     public static void main(String[] args) {

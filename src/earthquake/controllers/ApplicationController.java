@@ -32,8 +32,6 @@ public class ApplicationController {
 		if (dataFile != null) {
 			try {
 				System.out.println("Starting to load " + dataFile.toString());
-
-				readCsvDataFile(dataFile);
 				shaking.loadEarthquakeData(readCsvDataFile(dataFile));
 				System.out.println("File loaded " + dataFile.toString());
 			}
@@ -47,23 +45,33 @@ public class ApplicationController {
 	}
 
 	private static Optional<Double[]> extractValues(String text) {
+		System.out.println("extractValues " + text);
 		String[] tokens;
 		tokens = text.split(";");
+		System.out.println("tokens " + tokens);
 
 		if (tokens.length != 3) {
-			return Optional.empty();
+			throw new IllegalArgumentException(tokens.toString());
+			//return Optional.empty();
 		}
 		else {
 			Double[] values = new Double[3];
+
+			System.out.println("converting " + tokens[0]);
 			values[0] = Double.valueOf(tokens[0].replaceAll(",", "."));
+
+			System.out.println("converting " + tokens[1]);
 			values[1] = Double.valueOf(tokens[1].replaceAll(",", "."));
+
+			System.out.println("converting " + tokens[2]);
 			values[2] = Double.valueOf(tokens[2].replaceAll(",", "."));
+
 			return Optional.of(values);
 		}
 	}
 
-	private static List<Pair<Double, Double>> readCsvDataFile(File dataFile) throws IOException {
-		List<Pair<Double, Double>> result = new ArrayList<>();
+	private static List<Double[]> readCsvDataFile(File dataFile) throws IOException {
+		List<Double[]> result = new ArrayList<>();
 		BufferedReader reader = new BufferedReader(new FileReader(dataFile));
 		String currentLine;
 		do {
@@ -77,7 +85,8 @@ public class ApplicationController {
 				Double groundOffset = values[1];
 				Double buildingOffset = values[2];
 				System.out.println("[" + time.toString() + "s] -> (" + groundOffset.toString() + "m;" + buildingOffset.toString() + "m");
-				result.add(new Pair<>(time, buildingOffset * 1000));
+
+				result.add(values);
 			}
 		} while (currentLine != null);
 

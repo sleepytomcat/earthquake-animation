@@ -10,37 +10,57 @@ import javafx.util.Pair;
 import java.util.List;
 
 public class ShakingBuildingController {
-	public ShakingBuildingController(Pane moving) {
-		this.timeline = new Timeline();
-		this.moving = moving;
+	public ShakingBuildingController(Pane groundPane, Pane buildingPane) {
+		this.timelineBuilding = new Timeline();
+		this.timelineGround = new Timeline();
+		this.buildingPane = buildingPane;
+		this.groundPane = groundPane;
 	}
 
 	public void startShaking() {
-		timeline.play();
+		timelineBuilding.play();
+		timelineGround.play();
 	}
 
 	public void pauseShaking() {
-		timeline.pause();
+		timelineBuilding.pause();
+		timelineGround.pause();
 	}
 
 	public void stopShaking() {
-		timeline.stop();
+		timelineBuilding.stop();
+		timelineGround.stop();
 	}
 
 	public void shakingSpeed(double factor) {
-		timeline.setRate(factor);
+		timelineBuilding.setRate(factor);
+		timelineGround.setRate(factor);
 	}
 
-	public void loadEarthquakeData(List<Pair<Double, Double>> earthquakePairs) {
-		timeline.getKeyFrames().removeAll();
-		earthquakePairs
+	public void loadEarthquakeData(List<Double[]> earthquakeData) {
+		final double SCALE = 1000;
+		timelineBuilding.getKeyFrames().removeAll();
+		timelineGround.getKeyFrames().removeAll();
+
+		earthquakeData
 				.stream()
-				.map(pair -> new Pair<>(new KeyValue(moving.translateXProperty(), pair.getValue()), pair.getKey()))
+				.map(data -> new Pair<>(new KeyValue(buildingPane.translateXProperty(), data[2] * SCALE), data[0]))
 				.map(pair -> new KeyFrame(Duration.seconds(pair.getValue()), pair.getKey()))
-				.forEach(keyframe -> timeline.getKeyFrames().add(keyframe));
-		System.out.println("Frames loaded: " + timeline.getKeyFrames().size());
+				.forEach(keyframe -> timelineBuilding.getKeyFrames().add(keyframe));
+		System.out.println("Frames loaded: " + timelineBuilding.getKeyFrames().size());
+
+		earthquakeData
+				.stream()
+				.map(data -> new Pair<>(new KeyValue(groundPane.translateXProperty(), data[1] * SCALE), data[0]))
+				.map(pair -> new KeyFrame(Duration.seconds(pair.getValue()), pair.getKey()))
+				.forEach(keyframe -> timelineGround.getKeyFrames().add(keyframe));
+		System.out.println("Frames loaded: " + timelineGround.getKeyFrames().size());
 	}
 
-	private Timeline timeline;
-	private Pane moving;
+	private Timeline timelineBuilding;
+	private Pane buildingPane;
+
+	private Timeline timelineGround;
+	private Pane groundPane;
+
 }
