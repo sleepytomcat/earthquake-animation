@@ -13,10 +13,12 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 public class Main extends Application {
@@ -26,7 +28,8 @@ public class Main extends Application {
     	System.out.println("ver 1");
 	    Locale.setDefault(new Locale("ru", "RU"));
 	    System.out.println(Locale.getDefault());
-    	final double sceneWidth = 1400;
+
+	    final double sceneWidth = 1400;
         final double sceneHeight = 700;
 
         Pane[] animated = generateAnimatedPane();
@@ -34,37 +37,37 @@ public class Main extends Application {
         Pane groundPane = animated[1];
         Pane buildingPane = animated[2];
 
-	    Button playButton = new Button("Запуск");
-	    Button pauseButton = new Button("Пауза");
-	    Button stopButton = new Button("Стоп");
+	    Button playButton = new Button("Запуск анимации");
+	    //Button pauseButton = new Button("Пауза");
+	    //Button stopButton = new Button("Стоп");
 	    Button openFileButton = new Button("Загрузить данные");
 
 	    HBox hbox = new HBox();
 	    hbox.setSpacing(3);
 
-	    hbox.setBackground(new Background(new BackgroundFill(Color.FIREBRICK, null, null)));
+	    //hbox.setBackground(new Background(new BackgroundFill(Color.FIREBRICK, null, null)));
 
-	    hbox.getChildren().addAll(playButton, pauseButton, stopButton);
+	    hbox.getChildren().addAll(playButton/*, pauseButton, stopButton*/);
 	    hbox.getChildren().addAll(openFileButton);
-	    animated[0].setBackground(new Background(new BackgroundFill(Color.PINK, null, null)));
+	    //animated[0].setBackground(new Background(new BackgroundFill(Color.PINK, null, null)));
 
 	    BorderPane borderPaneLayout = new BorderPane();
 	    borderPaneLayout.setCenter(animationPane);
 	    borderPaneLayout.setBottom(hbox);
-	    borderPaneLayout.setBackground(new Background(new BackgroundFill(Color.YELLOWGREEN, null, null)));
+	    //borderPaneLayout.setBackground(new Background(new BackgroundFill(Color.YELLOWGREEN, null, null)));
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-        scene.setFill(Color.TURQUOISE);
+        //scene.setFill(Color.TURQUOISE);
         primaryStage.setTitle("Землятресения");
         primaryStage.setScene(scene);
         primaryStage.show();
 
 	    ShakingBuildingController shakingController = new ShakingBuildingController(groundPane, buildingPane);
 
-	    applicationController = new ApplicationController(shakingController);
+	    applicationController = new ApplicationController(shakingController, playButton, animationPane);
 	    playButton.setOnAction(event -> applicationController.startShaking());
-	    pauseButton.setOnAction(event -> applicationController.pauseShaking());
-	    stopButton.setOnAction(event -> applicationController.stopShaking());
+	    //pauseButton.setOnAction(event -> applicationController.pauseShaking());
+	    //stopButton.setOnAction(event -> applicationController.stopShaking());
 
 	    openFileButton.setOnAction(event -> {
 		    FileChooser fileChooser = new FileChooser();
@@ -87,49 +90,70 @@ public class Main extends Application {
 	    Polygon centerMarkk = new Polygon();
 	    centerMarkk.getPoints().addAll(new Double[]{
 			    0.0, 0.0,
-			    5.0, -20.0,
-			    -5.0, -20.0 });
+			    5.0, -40.0,
+			    -5.0, -40.0 });
 
 	    Pane buildingPane = new Pane();
         buildingPane.getChildren().addAll(rect, centerMarkk);
         return buildingPane;
     }
 
-    static Pane generateFloor() {
-        final double w = 700;
-        final double h = 5;
-        Rectangle rect = new Rectangle(-w/2, 0, w, h);
-	    rect.setFill(Color.LIGHTGRAY);
+    static Pane generateGround() {
+        final double w = 450;
+        final double h = 50;
+        Rectangle rect = new Rectangle(-w/2, 20, w, h);
+	    rect.setFill(Color.LIGHTSLATEGREY);
 	    rect.setStroke(Color.DARKGRAY);
 	    rect.setStrokeWidth(2);
 
-	    return new Pane(rect);
+	    Polygon centerMarkk = new Polygon();
+	    centerMarkk.getPoints().addAll(new Double[]{
+			    0.0, 20.0,
+			    5.0, 60.0,
+			    -5.0, 60.0 });
+
+	    Pane groundPane = new Pane();
+	    groundPane.getChildren().addAll(rect, centerMarkk);
+	    return groundPane;
     }
 
     static Pane[] generateAnimatedPane() {
         Pane centeredPane = new Pane();
-	    centeredPane.setBackground(new Background(new BackgroundFill(Color.YELLOW, null, null)));
-	    Group g = new Group();
+	    //centeredPane.setBackground(new Background(new BackgroundFill(Color.YELLOW, null, null)));
+	    Group animatedItemsGroup = new Group();
 	    Pane buildingPane = generateBox();
-	    Pane groundPane = generateFloor();
-	    g.getChildren().addAll(buildingPane, groundPane);
-	    centeredPane.getChildren().add(g);
-	    g.setAutoSizeChildren(false);
+	    Pane groundPane = generateGround();
+	    animatedItemsGroup.getChildren().addAll(buildingPane, groundPane);
+	    centeredPane.getChildren().add(animatedItemsGroup);
+	    animatedItemsGroup.setAutoSizeChildren(false);
 
-        Polygon centerMarkk = new Polygon();
-	    centerMarkk.getPoints().addAll(new Double[]{
-			    0.0, 0.0,
-			    5.0, 20.0,
-			    -5.0, 20.0 });
-	    g.getChildren().add(centerMarkk);
+	    List<Polygon> majorTicks = generateTicks(-5, 6, 0, 7, 20, 100);
+	    List<Polygon> minorTicks = generateTicks(-50, 51,5, 2, 10, 10);
 
+	    double tickDepth = 0;
+	    double tickWidth = 7;
+	    double tickHeight = 20;
+
+	    animatedItemsGroup.getChildren().addAll(minorTicks);
+	    animatedItemsGroup.getChildren().addAll(majorTicks);
+
+	    Polygon centerMark = new Polygon(
+	    		0, tickDepth,
+			    tickWidth / 2, tickHeight / 2 + tickDepth,
+				0,  tickHeight + tickDepth,
+			    -tickWidth / 2, tickHeight / 2 + tickDepth
+	    );
+
+	    centerMark.setFill(Color.BLACK);
+	    centerMark.setStroke(Color.GRAY);
+	    animatedItemsGroup.getChildren().addAll(centerMark);
 
 	    centeredPane.widthProperty().addListener((__, oldWidth, newWidth) -> {
-		    g.setTranslateX(newWidth.doubleValue() / 2);
+		    animatedItemsGroup.setTranslateX(newWidth.doubleValue() / 2);
 	    });
 
 	    centeredPane.heightProperty().addListener((__, oldHeight, newHeight) -> {
-		    g.setTranslateY(newHeight.doubleValue() / 8 * 7);
+		    animatedItemsGroup.setTranslateY(newHeight.doubleValue() * 0.80);
 	    });
 
 	    VBox vbox = new VBox();
@@ -147,7 +171,29 @@ public class Main extends Application {
 	    return panes;
     }
 
-    public static void main(String[] args) {
+	private static List<Polygon> generateTicks(int from, int to, double tickDepth, double tickWidth, double tickHeight, double tickStep) {
+		return IntStream.range(from, to)
+				.mapToObj(offset -> {
+					double[] points = {
+							offset * tickStep, tickDepth,
+							offset * tickStep + tickWidth / 2, tickHeight / 2 + tickDepth,
+							offset * tickStep, tickHeight + tickDepth,
+							offset * tickStep - tickWidth / 2, tickHeight / 2 + tickDepth
+					};
+					return new Polygon(points);
+				})
+				.map(tick -> {
+					tick.setFill(Color.LIGHTGRAY);
+					return tick;
+				})
+				.map(tick -> {
+					tick.setStroke(Color.GRAY);
+					return tick;
+				})
+				.collect(Collectors.toList());
+	}
+
+	public static void main(String[] args) {
         launch(args);
     }
 

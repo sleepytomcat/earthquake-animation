@@ -1,5 +1,7 @@
 package earthquake.controllers;
 
+import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 
 import java.io.*;
@@ -8,8 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class ApplicationController {
-	public ApplicationController(ShakingBuildingController shaking) {
+	public ApplicationController(ShakingBuildingController shaking, Button startAnimationButton, Pane animated) {
 		this.shaking = shaking;
+		this.startAnimationButton = startAnimationButton;
+		this.animatedPane = animated;
+
+		onNoData();
 	}
 
 	public void startShaking() {
@@ -34,6 +40,7 @@ public class ApplicationController {
 				System.out.println("Starting to load " + dataFile.toString());
 				shaking.loadEarthquakeData(readCsvDataFile(dataFile));
 				System.out.println("File loaded " + dataFile.toString());
+				onDataLoaded();
 			}
 			catch (IOException ex) {
 				System.out.println(ex);
@@ -93,5 +100,17 @@ public class ApplicationController {
 		return result;
 	}
 
+	private void onNoData() {
+		startAnimationButton.setDisable(true);
+		animatedPane.opacityProperty().setValue(0.2);
+	}
+
+	private void onDataLoaded() {
+		startAnimationButton.setDisable(false);
+		animatedPane.opacityProperty().setValue(1);
+	}
+
 	private ShakingBuildingController shaking;
+	private Button startAnimationButton;
+	private Pane animatedPane;
 }

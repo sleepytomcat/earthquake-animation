@@ -18,6 +18,9 @@ public class ShakingBuildingController {
 	}
 
 	public void startShaking() {
+		timelineBuilding.stop();
+		timelineGround.stop();
+
 		timelineBuilding.play();
 		timelineGround.play();
 	}
