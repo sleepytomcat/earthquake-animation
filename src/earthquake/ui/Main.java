@@ -7,7 +7,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.*;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
@@ -40,22 +45,25 @@ public class Main extends Application {
 	    Button playButton = new Button("Запуск анимации");
 	    Button openFileButton = new Button("Загрузить данные");
 
-	    HBox hbox = new HBox();
-	    hbox.setSpacing(3);
 
-	    hbox.getChildren().addAll(playButton);
-	    hbox.getChildren().addAll(openFileButton);
+	    HBox buttons = new HBox();
+	    buttons.getChildren().addAll(playButton);
+	    buttons.getChildren().addAll(openFileButton);
+
+	    ProgressBar animationProgress = new ProgressBar(0);
+		animationProgress.setMaxWidth(Double.MAX_VALUE);
+	    VBox vbox = new VBox(animationProgress, buttons);
 
 	    BorderPane borderPaneLayout = new BorderPane();
 	    borderPaneLayout.setCenter(animationPane);
-	    borderPaneLayout.setBottom(hbox);
+	    borderPaneLayout.setBottom(vbox);
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
         primaryStage.setTitle("Землятресения");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-	    ShakingBuildingController shakingController = new ShakingBuildingController(groundPane, buildingPane);
+	    ShakingBuildingController shakingController = new ShakingBuildingController(groundPane, buildingPane, animationProgress);
 
 	    applicationController = new ApplicationController(shakingController, playButton, animationPane);
 	    playButton.setOnAction(event -> applicationController.startShaking());

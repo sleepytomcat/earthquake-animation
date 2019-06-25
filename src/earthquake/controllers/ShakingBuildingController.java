@@ -1,8 +1,10 @@
 package earthquake.controllers;
 
+import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -10,16 +12,27 @@ import javafx.util.Pair;
 import java.util.List;
 
 public class ShakingBuildingController {
-	public ShakingBuildingController(Pane groundPane, Pane buildingPane) {
-		this.timelineBuilding = new Timeline();
-		this.timelineGround = new Timeline();
+	public ShakingBuildingController(Pane groundPane, Pane buildingPane, ProgressIndicator animationProgress) {
 		this.buildingPane = buildingPane;
 		this.groundPane = groundPane;
+		this.animationProgress = animationProgress;
+		this.timelineBuilding = new Timeline();
+		this.timelineGround = new Timeline();
+		this.animationTimer = new AnimationTimer() {
+			@Override
+			public void handle(long now) {
+				double progress = timelineBuilding.getCurrentTime().toMillis() / timelineBuilding.getTotalDuration().toMillis();
+				animationProgress.setProgress(progress);
+			}
+		};
 	}
 
 	public void startShaking() {
 		timelineBuilding.stop();
 		timelineGround.stop();
+
+		animationTimer.stop();
+		animationTimer.start();
 
 		timelineBuilding.play();
 		timelineGround.play();
@@ -33,6 +46,7 @@ public class ShakingBuildingController {
 	public void stopShaking() {
 		timelineBuilding.stop();
 		timelineGround.stop();
+		animationTimer.stop();
 	}
 
 	public void shakingSpeed(double factor) {
@@ -65,5 +79,6 @@ public class ShakingBuildingController {
 
 	private Timeline timelineGround;
 	private Pane groundPane;
-
+	private ProgressIndicator animationProgress;
+	private AnimationTimer animationTimer;
 }
