@@ -58,7 +58,7 @@ public class Main extends Application {
 	    borderPaneLayout.setBottom(vbox);
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-        primaryStage.setTitle("Землятресения, версия 1.1");
+        primaryStage.setTitle("Землятресения, версия 1.2");
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -95,7 +95,7 @@ public class Main extends Application {
 			    -5.0, -40.0 });
 
 	    Text offsetText = new Text();
-	    offsetText.setText("hello");
+	    //offsetText.setText("hello");
 	    offsetText.setY(-55);
 	    Pane buildingPane = new Pane();
         buildingPane.getChildren().addAll(rect, centerMarkk, offsetText);
