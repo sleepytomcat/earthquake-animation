@@ -8,7 +8,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -16,8 +15,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.File;
 import java.util.List;
@@ -57,11 +58,14 @@ public class Main extends Application {
 	    borderPaneLayout.setBottom(vbox);
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-        primaryStage.setTitle("Землятресения, версия 1.0");
+        primaryStage.setTitle("Землятресения, версия 1.1");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-	    ShakingBuildingController shakingController = new ShakingBuildingController(groundPane, buildingPane, animationProgress);
+	    ShakingBuildingController shakingController = new ShakingBuildingController(
+	    		groundPane,
+			    buildingPane,
+			    animationProgress);
 
 	    applicationController = new ApplicationController(shakingController, playButton, animationPane);
 	    playButton.setOnAction(event -> applicationController.startShaking());
@@ -76,7 +80,7 @@ public class Main extends Application {
 	    });
     }
 
-    static Pane generateBox() {
+    static Pair<Pane, Text> generateBox() {
         final double w = 300;
         final double h = 500;
         Rectangle rect = new Rectangle(-w/2, -h, w, h);
@@ -90,9 +94,12 @@ public class Main extends Application {
 			    5.0, -40.0,
 			    -5.0, -40.0 });
 
+	    Text offsetText = new Text();
+	    offsetText.setText("hello");
+	    offsetText.setY(-55);
 	    Pane buildingPane = new Pane();
-        buildingPane.getChildren().addAll(rect, centerMarkk);
-        return buildingPane;
+        buildingPane.getChildren().addAll(rect, centerMarkk, offsetText);
+        return new Pair<>(buildingPane, offsetText);
     }
 
     static Pane generateGround() {
@@ -117,14 +124,24 @@ public class Main extends Application {
     static Pane[] generateAnimatedPane() {
         Pane centeredPane = new Pane();
 	    Group animatedItemsGroup = new Group();
-	    Pane buildingPane = generateBox();
+	    Pair<Pane , Text> buildingPane = generateBox();
 	    Pane groundPane = generateGround();
-	    animatedItemsGroup.getChildren().addAll(buildingPane, groundPane);
+	    animatedItemsGroup.getChildren().addAll(buildingPane.getKey(), groundPane);
 	    centeredPane.getChildren().add(animatedItemsGroup);
 	    animatedItemsGroup.setAutoSizeChildren(false);
 
-	    List<Polygon> majorTicks = generateTicks(-5, 6, 5, 7, 20, 100);
-	    List<Polygon> minorTicks = generateTicks(-50, 51,10, 2, 10, 10);
+	    List<Group> majorTicks = generateTicks(-5, 6, 5, 7, 20, 100);
+	    List<Group> minorTicks = generateTicks(-50, 51,10, 2, 10, 10);
+
+	    Text minus500mm = new Text("-500 mm");
+	    minus500mm.setX(-65);
+	    minus500mm.setY(+14);
+	    majorTicks.get(0).getChildren().add(minus500mm);
+
+	    Text plus500mm = new Text("+500 mm");
+	    plus500mm.setX(+10);
+	    plus500mm.setY(+14);
+	    majorTicks.get(majorTicks.size() - 1).getChildren().add(plus500mm);
 
 	    double tickDepth = 5;
 	    double tickWidth = 7;
@@ -163,28 +180,30 @@ public class Main extends Application {
 	    Pane[] panes = new Pane[3];
 	    panes[0] = centeredPane;
 	    panes[1] = groundPane;
-	    panes[2] = buildingPane;
+	    panes[2] = buildingPane.getKey();
 	    return panes;
     }
 
-	private static List<Polygon> generateTicks(int from, int to, double tickDepth, double tickWidth, double tickHeight, double tickStep) {
+	private static List<Group> generateTicks(int from, int to, double tickDepth, double tickWidth, double tickHeight, double tickStep) {
 		return IntStream.range(from, to)
 				.mapToObj(offset -> {
+					Group tickGroup = new Group();
+					tickGroup.setTranslateX(offset * tickStep);
+					tickGroup.setTranslateY(tickDepth);
+					return tickGroup;
+				})
+				.map(group -> {
 					double[] points = {
-							offset * tickStep, tickDepth,
-							offset * tickStep + tickWidth / 2, tickHeight / 2 + tickDepth,
-							offset * tickStep, tickHeight + tickDepth,
-							offset * tickStep - tickWidth / 2, tickHeight / 2 + tickDepth
+							0, 0,
+							tickWidth / 2, tickHeight / 2,
+							0, tickHeight,
+							- tickWidth / 2, tickHeight / 2
 					};
-					return new Polygon(points);
-				})
-				.map(tick -> {
-					tick.setFill(Color.LIGHTGRAY);
-					return tick;
-				})
-				.map(tick -> {
-					tick.setStroke(Color.GRAY);
-					return tick;
+					Polygon polygon = new Polygon(points);
+					polygon.setFill(Color.LIGHTGRAY);
+					polygon.setStroke(Color.GRAY);
+					group.getChildren().add(polygon);
+					return group;
 				})
 				.collect(Collectors.toList());
 	}
