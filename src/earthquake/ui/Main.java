@@ -30,9 +30,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-    	System.out.println("ver 2");
 	    Locale.setDefault(new Locale("ru", "RU"));
-	    System.out.println(Locale.getDefault());
 
 	    final double sceneWidth = 1400;
         final double sceneHeight = 700;
@@ -59,7 +57,7 @@ public class Main extends Application {
 	    borderPaneLayout.setBottom(vbox);
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-        primaryStage.setTitle("Землятресения");
+        primaryStage.setTitle("Землятресения, версия 1.0");
         primaryStage.setScene(scene);
         primaryStage.show();
 
