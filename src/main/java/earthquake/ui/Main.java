@@ -3,6 +3,7 @@ package earthquake.ui;
 import earthquake.controllers.ApplicationController;
 import earthquake.controllers.ShakingBuildingController;
 import javafx.application.Application;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
+import io.vavr.*;
 
 public class Main extends Application {
 
@@ -36,14 +37,15 @@ public class Main extends Application {
 	    final double sceneWidth = 1400;
         final double sceneHeight = 700;
 
-        Pane[] animated = generateAnimatedPane();
-        Pane animationPane = animated[0];
-        Pane groundPane = animated[1];
-        Pane buildingPane = animated[2];
+        Tuple5<Pane, Pane, Pane, StringProperty, StringProperty> animated = generateAnimatedPane();
+        Pane animationPane = animated._1;
+        Pane groundPane = animated._2;
+        Pane buildingPane = animated._3;
+	    StringProperty groundOffsetString = animated._4;
+	    StringProperty buildingOffsetString = animated._5;
 
 	    Button playButton = new Button("Запуск анимации");
 	    Button openFileButton = new Button("Загрузить данные");
-
 
 	    HBox buttons = new HBox();
 	    buttons.getChildren().addAll(playButton);
@@ -58,14 +60,16 @@ public class Main extends Application {
 	    borderPaneLayout.setBottom(vbox);
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-        primaryStage.setTitle("Землятресения, версия 1.2");
+        primaryStage.setTitle("Землятресения, версия 1.3");
         primaryStage.setScene(scene);
         primaryStage.show();
 
 	    ShakingBuildingController shakingController = new ShakingBuildingController(
 	    		groundPane,
 			    buildingPane,
-			    animationProgress);
+			    animationProgress,
+			    groundOffsetString,
+			    buildingOffsetString);
 
 	    applicationController = new ApplicationController(shakingController, playButton, animationPane);
 	    playButton.setOnAction(event -> applicationController.startShaking());
@@ -80,7 +84,7 @@ public class Main extends Application {
 	    });
     }
 
-    static Pair<Pane, Text> generateBox() {
+    static Tuple2<Pane, StringProperty> generateBox() {
         final double w = 300;
         final double h = 500;
         Rectangle rect = new Rectangle(-w/2, -h, w, h);
@@ -95,14 +99,13 @@ public class Main extends Application {
 			    -5.0, -40.0 });
 
 	    Text offsetText = new Text();
-	    //offsetText.setText("hello");
 	    offsetText.setY(-55);
 	    Pane buildingPane = new Pane();
         buildingPane.getChildren().addAll(rect, centerMarkk, offsetText);
-        return new Pair<>(buildingPane, offsetText);
+        return Tuple.of(buildingPane, offsetText.textProperty());
     }
 
-    static Pane generateGround() {
+    static Tuple2<Pane, StringProperty> generateGround() {
         final double w = 450;
         final double h = 50;
         Rectangle rect = new Rectangle(-w/2, 30, w, h);
@@ -116,17 +119,20 @@ public class Main extends Application {
 			    5.0, 70.0,
 			    -5.0, 70.0 });
 
+	    Text offsetText = new Text();
+	    offsetText.setY(+100);
+
 	    Pane groundPane = new Pane();
-	    groundPane.getChildren().addAll(rect, centerMarkk);
-	    return groundPane;
+	    groundPane.getChildren().addAll(rect, centerMarkk, offsetText);
+	    return Tuple.of(groundPane, offsetText.textProperty());
     }
 
-    static Pane[] generateAnimatedPane() {
+    static Tuple5<Pane, Pane, Pane, StringProperty, StringProperty> generateAnimatedPane() {
         Pane centeredPane = new Pane();
 	    Group animatedItemsGroup = new Group();
-	    Pair<Pane , Text> buildingPane = generateBox();
-	    Pane groundPane = generateGround();
-	    animatedItemsGroup.getChildren().addAll(buildingPane.getKey(), groundPane);
+	    Tuple2<Pane, StringProperty> buildingPane = generateBox();
+	    Tuple2<Pane, StringProperty> groundPane = generateGround();
+	    animatedItemsGroup.getChildren().addAll(buildingPane._1, groundPane._1);
 	    centeredPane.getChildren().add(animatedItemsGroup);
 	    animatedItemsGroup.setAutoSizeChildren(false);
 
@@ -177,11 +183,7 @@ public class Main extends Application {
 	    hbox.getChildren().add(centeredPane);
 	    hbox.setAlignment(Pos.CENTER);
 
-	    Pane[] panes = new Pane[3];
-	    panes[0] = centeredPane;
-	    panes[1] = groundPane;
-	    panes[2] = buildingPane.getKey();
-	    return panes;
+	    return Tuple.of(centeredPane, groundPane._1, buildingPane._1, groundPane._2, buildingPane._2);
     }
 
 	private static List<Group> generateTicks(int from, int to, double tickDepth, double tickWidth, double tickHeight, double tickStep) {

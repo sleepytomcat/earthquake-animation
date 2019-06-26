@@ -8,10 +8,10 @@
 
 plugins {
     // Apply the java plugin to add support for Java
-    java
+    id 'java'
 
     // Apply the application plugin to add support for building an application
-    application
+    id 'application'
 }
 
 repositories {
@@ -22,13 +22,12 @@ repositories {
 
 dependencies {
     // This dependency is found on compile classpath of this component and consumers.
-    // implementation("com.google.guava:guava:27.0.1-jre")
+    implementation 'com.google.guava:guava:27.0.1-jre'
+    implementation 'io.vavr:vavr:0.10.0'
 
     // Use JUnit test framework
-    testImplementation("junit:junit:4.12")
+    testImplementation 'junit:junit:4.12'
 }
 
-application {
-    // Define the main class for the application
-    mainClassName = "earthquake.ui.Main"
-}
+// Define the main class for the application
+mainClassName = 'earthquake.ui.Main'

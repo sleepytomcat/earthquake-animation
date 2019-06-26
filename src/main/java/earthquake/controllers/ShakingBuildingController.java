@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
@@ -12,7 +13,7 @@ import javafx.util.Pair;
 import java.util.List;
 
 public class ShakingBuildingController {
-	public ShakingBuildingController(Pane groundPane, Pane buildingPane, ProgressIndicator animationProgress) {
+	public ShakingBuildingController(Pane groundPane, Pane buildingPane, ProgressIndicator animationProgress, StringProperty groundOffsetText, StringProperty buildingOffsetText) {
 		this.buildingPane = buildingPane;
 		this.groundPane = groundPane;
 		this.animationProgress = animationProgress;
@@ -23,8 +24,16 @@ public class ShakingBuildingController {
 			public void handle(long now) {
 				double progress = timelineBuilding.getCurrentTime().toMillis() / timelineBuilding.getTotalDuration().toMillis();
 				animationProgress.setProgress(progress);
+
+				String buildingOffsetString = String.format("%,.2f", buildingPane.getTranslateX());
+				buildingOffsetText.setValue(buildingOffsetString);
+
+				String groundOffsetString = String.format("%,.2f", groundPane.getTranslateX());
+				groundOffsetText.setValue(groundOffsetString);
 			}
 		};
+		this.buildingOffsetText = buildingOffsetText;
+		this.groundOffsetText = groundOffsetText;
 	}
 
 	public void startShaking() {
@@ -56,6 +65,8 @@ public class ShakingBuildingController {
 
 	public void loadEarthquakeData(List<Double[]> earthquakeData) {
 		final double SCALE = 1000;
+		timelineBuilding.stop();
+		timelineGround.stop();
 		timelineBuilding.getKeyFrames().removeAll();
 		timelineGround.getKeyFrames().removeAll();
 
@@ -81,4 +92,6 @@ public class ShakingBuildingController {
 	private Pane groundPane;
 	private ProgressIndicator animationProgress;
 	private AnimationTimer animationTimer;
+	private StringProperty buildingOffsetText;
+	private StringProperty groundOffsetText;
 }
