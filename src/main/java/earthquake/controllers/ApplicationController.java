@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class ApplicationController {
-	public ApplicationController(ShakingBuildingController shaking, Button startAnimationButton, Pane animated) {
+	public ApplicationController(ShakingBuildingController shaking, Button pauseResumeAnimationButton, Pane animated) {
 		this.shaking = shaking;
-		this.startAnimationButton = startAnimationButton;
+		//this.startAnimationButton = startAnimationButton;
+		this.pauseResumeAnimationButton = pauseResumeAnimationButton;
 		this.animatedPane = animated;
 
 		onNoData();
@@ -32,6 +33,9 @@ public class ApplicationController {
 
 	public void shakingSpeed(double factor) {
 		shaking.shakingSpeed(factor);
+	}
+	public void pauseResume() {
+		shaking.pauseResume();
 	}
 
 	public void openDataFile(File dataFile) {
@@ -101,16 +105,19 @@ public class ApplicationController {
 	}
 
 	private void onNoData() {
-		startAnimationButton.setDisable(true);
+		//startAnimationButton.setDisable(true);
+		pauseResumeAnimationButton.setDisable(true);
 		animatedPane.opacityProperty().setValue(0.2);
 	}
 
 	private void onDataLoaded() {
-		startAnimationButton.setDisable(false);
+		//startAnimationButton.setDisable(false);
+		pauseResumeAnimationButton.setDisable(false);
 		animatedPane.opacityProperty().setValue(1);
 	}
 
 	private ShakingBuildingController shaking;
-	private Button startAnimationButton;
+	//private Button startAnimationButton;
+	private Button pauseResumeAnimationButton;
 	private Pane animatedPane;
 }

@@ -1,9 +1,6 @@
 package earthquake.controllers;
 
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
@@ -13,27 +10,31 @@ import javafx.util.Pair;
 import java.util.List;
 
 public class ShakingBuildingController {
-	public ShakingBuildingController(Pane groundPane, Pane buildingPane, ProgressIndicator animationProgress, StringProperty groundOffsetText, StringProperty buildingOffsetText) {
+	public ShakingBuildingController(Pane groundPane, Pane buildingPane, ProgressIndicator animationProgress, StringProperty groundOffsetText, StringProperty buildingOffsetText, StringProperty animationTime) {
 		this.buildingPane = buildingPane;
 		this.groundPane = groundPane;
 		this.animationProgress = animationProgress;
 		this.timelineBuilding = new Timeline();
 		this.timelineGround = new Timeline();
+		this.buildingOffsetText = buildingOffsetText;
+		this.groundOffsetText = groundOffsetText;
+		this.animationTime = animationTime;
 		this.animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
 				double progress = timelineBuilding.getCurrentTime().toMillis() / timelineBuilding.getTotalDuration().toMillis();
 				animationProgress.setProgress(progress);
 
-				String buildingOffsetString = String.format("%,.2f", buildingPane.getTranslateX());
+				String buildingOffsetString = String.format("%,.2f мм", buildingPane.getTranslateX());
 				buildingOffsetText.setValue(buildingOffsetString);
 
-				String groundOffsetString = String.format("%,.2f", groundPane.getTranslateX());
+				String groundOffsetString = String.format("%,.2f мм", groundPane.getTranslateX());
 				groundOffsetText.setValue(groundOffsetString);
+
+				String time = String.format("%,.2f с",timelineBuilding.getCurrentTime().toSeconds());
+				animationTime.setValue(time);
 			}
 		};
-		this.buildingOffsetText = buildingOffsetText;
-		this.groundOffsetText = groundOffsetText;
 	}
 
 	public void startShaking() {
@@ -85,6 +86,29 @@ public class ShakingBuildingController {
 		System.out.println("Frames loaded: " + timelineGround.getKeyFrames().size());
 	}
 
+	public void pauseResume() {
+		if (timelineBuilding.getStatus() == Animation.Status.RUNNING) {
+			timelineBuilding.pause();
+		}
+		else if (timelineBuilding.getStatus() == Animation.Status.STOPPED) {
+			timelineBuilding.play();
+			animationTimer.start();
+		} else {
+			timelineBuilding.play();
+		}
+
+		if (timelineGround.getStatus() == Animation.Status.RUNNING) {
+			timelineGround.pause();
+		}
+		else if (timelineGround.getStatus() == Animation.Status.STOPPED) {
+			timelineGround.play();
+			animationTimer.start();
+		}
+		else {
+			timelineGround.play();
+		}
+	}
+
 	private Timeline timelineBuilding;
 	private Pane buildingPane;
 
@@ -94,4 +118,5 @@ public class ShakingBuildingController {
 	private AnimationTimer animationTimer;
 	private StringProperty buildingOffsetText;
 	private StringProperty groundOffsetText;
+	private StringProperty animationTime;
 }

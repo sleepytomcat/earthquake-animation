@@ -44,23 +44,29 @@ public class Main extends Application {
 	    StringProperty groundOffsetString = animated._4;
 	    StringProperty buildingOffsetString = animated._5;
 
-	    Button playButton = new Button("Запуск анимации");
+	    //Button playButton = new Button("Запуск анимации");
+	    Button playPauseResume = new Button("Запуск / Пауза");
 	    Button openFileButton = new Button("Загрузить данные");
 
 	    HBox buttons = new HBox();
-	    buttons.getChildren().addAll(playButton);
-	    buttons.getChildren().addAll(openFileButton);
+	    buttons.getChildren().addAll(playPauseResume, openFileButton);
+
+	    HBox animationTime = new HBox();
+	    animationTime.setAlignment(Pos.TOP_CENTER);
+	    Text time = new Text();
+	    time.setStyle("-fx-font-size: 30");
+	    animationTime.getChildren().addAll(time);
 
 	    ProgressBar animationProgress = new ProgressBar(0);
 		animationProgress.setMaxWidth(Double.MAX_VALUE);
-	    VBox vbox = new VBox(animationProgress, buttons);
+	    VBox vbox = new VBox(animationTime, animationProgress, buttons);
 
 	    BorderPane borderPaneLayout = new BorderPane();
 	    borderPaneLayout.setCenter(animationPane);
 	    borderPaneLayout.setBottom(vbox);
 
         Scene scene = new Scene(borderPaneLayout, sceneWidth, sceneHeight);
-        primaryStage.setTitle("Землятресения, версия 1.3");
+        primaryStage.setTitle("Землятресения, версия 1.4");
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -69,10 +75,11 @@ public class Main extends Application {
 			    buildingPane,
 			    animationProgress,
 			    groundOffsetString,
-			    buildingOffsetString);
+			    buildingOffsetString,
+			    time.textProperty());
 
-	    applicationController = new ApplicationController(shakingController, playButton, animationPane);
-	    playButton.setOnAction(event -> applicationController.startShaking());
+	    applicationController = new ApplicationController(shakingController, playPauseResume, animationPane);
+	    //playButton.setOnAction(event -> applicationController.startShaking());
 
 	    openFileButton.setOnAction(event -> {
 		    FileChooser fileChooser = new FileChooser();
@@ -82,11 +89,15 @@ public class Main extends Application {
 		    File dataFile = fileChooser.showOpenDialog(primaryStage);
 		    applicationController.openDataFile(dataFile);
 	    });
+
+	    playPauseResume.setOnAction(event -> {
+		    applicationController.pauseResume();
+	    });
     }
 
     static Tuple2<Pane, StringProperty> generateBox() {
-        final double w = 300;
-        final double h = 500;
+        final double w = 350;
+        final double h = 300;
         Rectangle rect = new Rectangle(-w/2, -h, w, h);
 	    rect.setFill(Color.LIGHTGRAY);
 	    rect.setStroke(Color.DARKGRAY);
@@ -99,6 +110,7 @@ public class Main extends Application {
 			    -5.0, -40.0 });
 
 	    Text offsetText = new Text();
+	    offsetText.setStyle("-fx-font-size: 30");
 	    offsetText.setY(-55);
 	    Pane buildingPane = new Pane();
         buildingPane.getChildren().addAll(rect, centerMarkk, offsetText);
@@ -120,7 +132,8 @@ public class Main extends Application {
 			    -5.0, 70.0 });
 
 	    Text offsetText = new Text();
-	    offsetText.setY(+100);
+	    offsetText.setStyle("-fx-font-size: 30");
+	    offsetText.setY(+120);
 
 	    Pane groundPane = new Pane();
 	    groundPane.getChildren().addAll(rect, centerMarkk, offsetText);
@@ -172,7 +185,7 @@ public class Main extends Application {
 	    });
 
 	    centeredPane.heightProperty().addListener((__, oldHeight, newHeight) -> {
-		    animatedItemsGroup.setTranslateY(newHeight.doubleValue() * 0.80);
+		    animatedItemsGroup.setTranslateY(newHeight.doubleValue() * 0.70);
 	    });
 
 	    VBox vbox = new VBox();
