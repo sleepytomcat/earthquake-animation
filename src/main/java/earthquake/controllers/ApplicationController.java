@@ -1,5 +1,6 @@
 package earthquake.controllers;
 
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
@@ -10,12 +11,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class ApplicationController {
-	public ApplicationController(ShakingBuildingController shaking, Button pauseResumeAnimationButton, Pane animated) {
+	public ApplicationController(ShakingBuildingController shaking,
+	                             Button pauseResumeAnimationButton,
+	                             Pane animated,
+	                             StringProperty dataFileName) {
 		this.shaking = shaking;
 		//this.startAnimationButton = startAnimationButton;
 		this.pauseResumeAnimationButton = pauseResumeAnimationButton;
 		this.animatedPane = animated;
-
+		this.dataFileName = dataFileName;
 		onNoData();
 	}
 
@@ -44,7 +48,7 @@ public class ApplicationController {
 				System.out.println("Starting to load " + dataFile.toString());
 				shaking.loadEarthquakeData(readCsvDataFile(dataFile));
 				System.out.println("File loaded " + dataFile.toString());
-				onDataLoaded();
+				onDataLoaded(dataFile);
 			}
 			catch (IOException ex) {
 				System.out.println(ex);
@@ -110,14 +114,16 @@ public class ApplicationController {
 		animatedPane.opacityProperty().setValue(0.2);
 	}
 
-	private void onDataLoaded() {
+	private void onDataLoaded(File dataFile) {
 		//startAnimationButton.setDisable(false);
 		pauseResumeAnimationButton.setDisable(false);
 		animatedPane.opacityProperty().setValue(1);
+		dataFileName.setValue("Загружены данные: " + dataFile.getName());
 	}
 
 	private ShakingBuildingController shaking;
 	//private Button startAnimationButton;
 	private Button pauseResumeAnimationButton;
 	private Pane animatedPane;
+	private StringProperty dataFileName;
 }

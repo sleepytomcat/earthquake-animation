@@ -68,8 +68,8 @@ public class ShakingBuildingController {
 		final double SCALE = 1000;
 		timelineBuilding.stop();
 		timelineGround.stop();
-		timelineBuilding.getKeyFrames().removeAll();
-		timelineGround.getKeyFrames().removeAll();
+		timelineBuilding.getKeyFrames().clear();
+		timelineGround.getKeyFrames().clear();
 
 		earthquakeData
 				.stream()

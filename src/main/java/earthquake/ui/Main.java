@@ -78,7 +78,7 @@ public class Main extends Application {
 			    buildingOffsetString,
 			    time.textProperty());
 
-	    applicationController = new ApplicationController(shakingController, playPauseResume, animationPane);
+	    applicationController = new ApplicationController(shakingController, playPauseResume, animationPane, primaryStage.titleProperty());
 	    //playButton.setOnAction(event -> applicationController.startShaking());
 
 	    openFileButton.setOnAction(event -> {
