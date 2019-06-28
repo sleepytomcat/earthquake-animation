@@ -96,8 +96,8 @@ public class Main extends Application {
     }
 
     static Tuple2<Pane, StringProperty> generateBox() {
-        final double w = 350;
-        final double h = 300;
+        final double w = 340;
+        final double h = 450;
         Rectangle rect = new Rectangle(-w/2, -h, w, h);
 	    rect.setFill(Color.LIGHTGRAY);
 	    rect.setStroke(Color.DARKGRAY);
@@ -153,11 +153,14 @@ public class Main extends Application {
 	    List<Group> minorTicks = generateTicks(-50, 51,10, 2, 10, 10);
 
 	    Text minus500mm = new Text("-500 mm");
-	    minus500mm.setX(-65);
+	    minus500mm.setStyle("-fx-font-size: 20");
+
+	    minus500mm.setX(-100);
 	    minus500mm.setY(+14);
 	    majorTicks.get(0).getChildren().add(minus500mm);
 
 	    Text plus500mm = new Text("+500 mm");
+	    plus500mm.setStyle("-fx-font-size: 20");
 	    plus500mm.setX(+10);
 	    plus500mm.setY(+14);
 	    majorTicks.get(majorTicks.size() - 1).getChildren().add(plus500mm);
@@ -185,7 +188,7 @@ public class Main extends Application {
 	    });
 
 	    centeredPane.heightProperty().addListener((__, oldHeight, newHeight) -> {
-		    animatedItemsGroup.setTranslateY(newHeight.doubleValue() * 0.70);
+		    animatedItemsGroup.setTranslateY(newHeight.doubleValue() * 0.79);
 	    });
 
 	    VBox vbox = new VBox();
